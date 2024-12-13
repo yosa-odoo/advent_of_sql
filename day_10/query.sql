@@ -1,20 +1,22 @@
-with average as (
+with data as (
     select
-        reindeer_id,
-        exercise_name,
-        avg(speed_record) as avg_time
-    from training_sessions
-    group by reindeer_id, exercise_name
-),
-    average_max as (
-    select
-        reindeer_id,
-        max(avg_time) as avg_max
-    from average
-    group by reindeer_id
+        date,
+        SUM(quantity) filter (where drink_name = 'Eggnog') as eggnog,
+        SUM(quantity) filter (where drink_name = 'Hot Cocoa') as hot_cocoa,
+        SUM(quantity) filter (where drink_name = 'Peppermint Schnapps') as schnapps
+    from drinks
+    group by date
 )
 select
-    r.reindeer_name,
-    round(avg_max, 2)
-from average_max as a inner join reindeers as r on r.reindeer_id = a.reindeer_id
-order by avg_max desc limit 3;
+    date
+from data
+where hot_cocoa = '38' and schnapps = '298' and eggnog = '198';
+
+
+-- other solution
+SELECT date FROM drinks WHERE drink_name = 'Hot Cocoa' GROUP BY date HAVING sum(quantity) = 38
+INTERSECT
+SELECT date FROM drinks WHERE drink_name = 'Peppermint Schnapps' GROUP BY date HAVING sum(quantity) = 298
+INTERSECT
+SELECT date FROM drinks WHERE drink_name = 'Eggnog' GROUP BY date HAVING sum(quantity) = 198
+;
